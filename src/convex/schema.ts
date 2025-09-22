@@ -32,12 +32,38 @@ const schema = defineSchema(
       role: v.optional(roleValidator), // role of the user. do not remove
     }).index("email", ["email"]), // index for the email. do not remove or modify
 
-    // add other tables here
+    // Chess positions and evaluations
+    positions: defineTable({
+      fen: v.string(), // FEN notation of the position
+      evaluation: v.number(), // Evaluation score (-10 to +10, positive favors white)
+      userId: v.optional(v.id("users")), // User who created this position
+      gameId: v.optional(v.string()), // Optional game identifier
+      moveNumber: v.optional(v.number()), // Move number in the game
+    }).index("by_fen", ["fen"])
+      .index("by_user", ["userId"])
+      .index("by_game", ["gameId"]),
 
-    // tableName: defineTable({
-    //   ...
-    //   // table fields
-    // }).index("by_field", ["field"])
+    // Chess games
+    games: defineTable({
+      pgn: v.string(), // PGN notation of the game
+      whitePlayer: v.optional(v.string()),
+      blackPlayer: v.optional(v.string()),
+      result: v.optional(v.string()), // "1-0", "0-1", "1/2-1/2"
+      userId: v.optional(v.id("users")), // User who uploaded/created this game
+      source: v.optional(v.string()), // "lichess", "user", etc.
+    }).index("by_user", ["userId"])
+      .index("by_result", ["result"]),
+
+    // User analysis sessions
+    analyses: defineTable({
+      userId: v.id("users"),
+      fen: v.string(),
+      evaluation: v.number(),
+      depth: v.optional(v.number()), // Analysis depth
+      bestMove: v.optional(v.string()), // Best move in algebraic notation
+      principalVariation: v.optional(v.array(v.string())), // Sequence of best moves
+    }).index("by_user", ["userId"])
+      .index("by_user_and_fen", ["userId", "fen"]),
   },
   {
     schemaValidation: false,
