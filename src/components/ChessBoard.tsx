@@ -1,4 +1,4 @@
-import { useState, useCallback } from "react";
+import { useState, useCallback, useEffect } from "react";
 import { motion } from "framer-motion";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -11,6 +11,8 @@ interface ChessBoardProps {
   onEvaluate: (fen: string) => void;
   evaluation: number | null;
   isEvaluating: boolean;
+  // Accept externally provided FEN to control the board from parent
+  externalFen?: string;
 }
 
 // Starting position FEN
@@ -22,9 +24,16 @@ const PIECE_SYMBOLS: Record<string, string> = {
   'k': '♚', 'q': '♛', 'r': '♜', 'b': '♝', 'n': '♞', 'p': '♟'
 };
 
-export default function ChessBoard({ onEvaluate, evaluation, isEvaluating }: ChessBoardProps) {
+export default function ChessBoard({ onEvaluate, evaluation, isEvaluating, externalFen }: ChessBoardProps) {
   const [fen, setFen] = useState(STARTING_FEN);
   const [copied, setCopied] = useState(false);
+
+  // Sync internal FEN with external FEN when provided
+  useEffect(() => {
+    if (externalFen && externalFen.trim() && externalFen !== fen) {
+      setFen(externalFen);
+    }
+  }, [externalFen, fen]);
 
   const parseFenToBoard = useCallback((fenString: string) => {
     const boardPart = fenString.split(' ')[0];

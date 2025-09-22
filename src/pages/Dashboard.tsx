@@ -126,6 +126,7 @@ export default function Dashboard() {
               onEvaluate={handleEvaluate}
               evaluation={evaluation}
               isEvaluating={isEvaluating}
+              externalFen={currentFen}
             />
             
             <EvaluationStats />
